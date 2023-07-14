@@ -1,9 +1,0 @@
-function printForm(){
-  let hospitalName = "CURE Ethiopia Children's Hospital";
-  let allComponents = document.querySelectorAll('.patient-form-data');
-  let title = allComponents[0].querySelectorAll('.section-title');
-  let observations = allComponents[0].querySelectorAll('.hidden-print');
-  alert("Sorry for the inconvenience; this function will be reinstated soon.");
-  var testData = $(observations)
-  console.log(testData)
-}
