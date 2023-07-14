@@ -1,6 +1,0 @@
-<div class="template-container">
-    <section class="block dashboard-section patient-form-data">
-        <bahmni-observation patient="ngDialogData.patient" config="ngDialogData.config" is-on-dashboard="false" section-title="ngDialogData.section.title"></bahmni-observation>
-    </section>
-    <button id="button-print-exception"onclick="printForm()">P<u>r</u>int</button>
-</div>
