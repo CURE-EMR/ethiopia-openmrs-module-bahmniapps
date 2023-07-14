@@ -1,0 +1,35 @@
+<div class="patient-info-fixed-postion-container" id="patientContext">
+    <div class="patient-info-fixed">
+        <ul>
+            <li class="patient-name-image-container">
+                <img class="patient-image" ng-src="{{::patientContext.image}}" fallback-src="../images/blank-user.gif">
+                <span class="patient-name" ng-if="showNameAndImage" id="med-patient-name">
+                  {{patientContext.givenName}} {{patientContext.familyName}}
+                </span>
+                <span class="patient-name" id="med-patient-identifier">
+                    ({{patientContext.identifier}})
+                </span>
+            </li>
+            <li id="med-patient-gender">{{patientContext.gender}}</li>
+	
+            <li id="med-patient-age" >{{patientContext.birthdate | birthDateToAgeText}}</li>
+            <li id="med-patient-dob">Date of Birth: {{patientContext.birthdate | bahmniDate}}</li>
+	    <li id="med-patient-address" style="display:none">Address: {{patientContext.address}}</li>
+            <li ng-repeat="(key, value) in patientContext.additionalPatientIdentifiers">
+                {{key}}: {{value}}
+            </li>
+            <li ng-repeat="(key, value) in patientContext.personAttributes">
+                {{value.description}}: {{value.value}}
+            </li>
+            <li ng-repeat="(key, value) in patientContext.programAttributes">
+                {{value.description}}: {{value.value}}
+            </li>
+	    <li style="display:none" ng-repeat="(key, value) in patientContext.programAttributes">
+		{{value.description}}: {{value.value}}
+	    </li>
+        </ul>
+	<div style="display:none">
+		<spin>{{patientContext}}</spin>
+	</div>
+    </div>
+</div>

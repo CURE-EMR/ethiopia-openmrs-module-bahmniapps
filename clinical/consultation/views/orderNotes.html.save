@@ -1,0 +1,22 @@
+<div class="selectedOrderNoteContainer">
+    <span>{{ 'ENTER_ORDER_NOTE_LABEL' | translate }} - {{ngDialogData.concept.displayName || ngDialogData.concept.shortName || ngDialogData.concept.name}}</span>
+
+    <textarea ng-model="$parent.orderNoteText" focus-on="true" rows="4" cols="50" ng-disabled="ngDialogData.uuid">{{ngDialogData.previousNote}}</textarea>
+   <!-- <button ng-click="appendPrintNotes(ngDialogData)" class="fl btn-group" ng-show="isPrintShown(ngDialogData.uuid)">{{ 'CLINICAL_ORDER_RADIOLOGY_NEED_PRINT_BUTTON' | translate}}</button> -->
+    <div class="btn-group fr">
+        <span ng-if="ngDialogData.uuid">
+            {{ 'ORDER_CAN_NOT_EDIT_AFTER_SAVE_MESSAGE'|translate }}
+        </span>
+       <!-- <button ng-click="setEditedFlag(ngDialogData, orderNoteText)" ng-if="!ngDialogData.uuid">{{ 'OKAY_LABEL' | translate}}</button> -->
+
+    <button ng-click="appendPrintNotes(ngDialogData, 'Pre-operative X-ray for diagnostic or planning purposes')" class="fl btn-group" xxng-show="isPrintShown(ngDialogData.uuid)">Pre-Op</button>
+    <button ng-click="appendPrintNotes(ngDialogData, 'Post-operative X-ray for assessing healing or implant position')" class="fl btn-group" xxng-show="isPrintShown(ngDialogData.uuid)">Post-Op</button>
+    <button ng-click="appendPrintNotes(ngDialogData, 'Monitoring of progress for alignment / comparative purposes')" class="fl btn-group" xxng-show="isPrintShown(ngDialogData.uuid)">Monitoring</button>
+    <button ng-click="appendPrintNotes(ngDialogData, 'Request from clinic')" class="fl btn-group" xxng-show="isPrintShown(ngDialogData.uuid)">From Clinic</button>
+    <button ng-click="appendPrintNotes(ngDialogData, 'Request from ward')" class="fl btn-group" xxng-show="isPrintShown(ngDialogData.uuid)">From Ward</button>
+    <button ng-click="appendPrintNotes(ngDialogData, 'High Risk')" class="fl btn-group" xxng-show="isPrintShown(ngDialogData.uuid)">High Risk</button>
+    <button ng-click="appendPrintNotes(ngDialogData, 'URGENT')" class="fl btn-group" xxng-show="isPrintShown(ngDialogData.uuid)">URGENT</button>
+    <br/>Requested by: <select ng-model="selectedName" ng-change="appendPrintNotes(ngDialogData, 'Requested by: '+selectedName)" ng-options="x for x in doctorsNames"></select>&nbsp;&nbsp;
+    <button ng-click="setEditedFlag(ngDialogData, orderNoteText)" ng-if="!ngDialogData.uuid">{{ 'OKAY_LABEL' | translate}}</button>
+    </div>
+</div>

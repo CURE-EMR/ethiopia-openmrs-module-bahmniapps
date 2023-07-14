@@ -1,0 +1,89 @@
+<form novalidate>
+    <div ng-if="::showEmptyConceptSetMessage" class="placeholder-text">{{::conceptSetName}} {{ 'CONCEPT_NOT_FOUND_MESSAGE'|translate }}</div>
+
+    <concept concept-set-required="conceptSetRequired" root-observation="rootObservation" patient="::patient" observation="rootObservation" at-least-one-value-is-set="atLeastOneValueIsSet" show-title="::showTitleValue" collapse-inner-sections="collapseInnerSections" ng-if="!rootObservation.hidden" concept-set-name="::conceptSetName" hide-abnormal-button="hideAbnormalButton">
+    </concept>
+
+</form>
+<script>
+const eq5dy = document.getElementById("concept-set-2afb49f9-721a-4c34-b7c2-2d823156f830");
+if (eq5dy) {
+    var currentNext6Date = new Date();
+    currentNext6Date.setMonth(currentNext6Date.getMonth() + 6);
+    var currentNext12Date = new Date();
+    currentNext12Date.setMonth(currentNext12Date.getMonth() + 12);
+    let returnAfterField = 'Return after:';
+    let returnAfterFieldAnswers = '{ "6 Months": "'+currentNext6Date.toISOString().slice(0, 10)+'", "12 Months": "'+currentNext12Date.toISOString().slice(0, 10)+'"}';
+    const obj = JSON.parse(returnAfterFieldAnswers);
+    //let returnAfterFieldAnswers = new O
+    const wrapper = document.getElementById("concept-set-2afb49f9-721a-4c34-b7c2-2d823156f830");
+    wrapper.addEventListener('click', (event) => {
+        const isButton = event.target.nodeName === 'BUTTON';
+        if (!isButton) {
+            return;
+        }
+	let questionStr = event.target.closest('fieldset').getElementsByTagName('label')[0].innerHTML.split("<")[1];
+        let question = questionStr.substring(questionStr.lastIndexOf(">") + 1)
+        let button = event.target.title;
+
+        if (question.trim() === returnAfterField) {
+           $( "#concept-set-2afb49f9-721a-4c34-b7c2-2d823156f830 input[type='date']" ).last().val(obj[button]);
+	   //document.getElementById("concept-set-2afb49f9-721a-4c34-b7c2-2d823156f830").querySelector('input:last-of-type').value = obj[button];
+        }
+    })
+}
+</script>
+
+<script>
+const schoolWhodas = document.getElementById("concept-set-0d938e9b-3e46-4299-813c-b1ef13976540");
+if (schoolWhodas) {
+    var currentNext6Date = new Date();
+    currentNext6Date.setMonth(currentNext6Date.getMonth() + 6);
+    var currentNext12Date = new Date();
+    currentNext12Date.setMonth(currentNext12Date.getMonth() + 12);
+    let returnAfterField = 'Return after:';
+    let returnAfterFieldAnswers = '{ "6 Months": "'+currentNext6Date.toISOString().slice(0, 10)+'", "12 Months": "'+currentNext12Date.toISOString().slice(0, 10)+'"}';
+    const obj = JSON.parse(returnAfterFieldAnswers);
+    const wrapper = document.getElementById("concept-set-0d938e9b-3e46-4299-813c-b1ef13976540");
+    wrapper.addEventListener('click', (event) => {
+        const isButton = event.target.nodeName === 'BUTTON';
+        if (!isButton) {
+            return;
+        }
+	let questionStr = event.target.closest('fieldset').getElementsByTagName('label')[0].innerHTML.split("<")[1];
+        let question = questionStr.substring(questionStr.lastIndexOf(">") + 1)
+        let button = event.target.title;
+
+        if (question.trim() === returnAfterField) {
+            $( "#concept-set-0d938e9b-3e46-4299-813c-b1ef13976540 input[type='date']" ).last().val(obj[button]);
+        }
+    })
+}
+</script>
+
+<script>
+const nonSchoolWhodas = document.getElementById("concept-set-bc3c7215-bb67-4532-a35c-af73e439d25b");
+if (nonSchoolWhodas) {
+    var currentNext6Date = new Date();
+    currentNext6Date.setMonth(currentNext6Date.getMonth() + 6);
+    var currentNext12Date = new Date();
+    currentNext12Date.setMonth(currentNext12Date.getMonth() + 12);
+    let returnAfterField = 'Return after:';
+    let returnAfterFieldAnswers = '{ "6 Months": "'+currentNext6Date.toISOString().slice(0, 10)+'", "12 Months": "'+currentNext12Date.toISOString().slice(0, 10)+'"}';
+    const obj = JSON.parse(returnAfterFieldAnswers);
+    const wrapper = document.getElementById("concept-set-bc3c7215-bb67-4532-a35c-af73e439d25b");
+    wrapper.addEventListener('click', (event) => {
+        const isButton = event.target.nodeName === 'BUTTON';
+        if (!isButton) {
+            return;
+        }
+        let questionStr = event.target.closest('fieldset').getElementsByTagName('label')[0].innerHTML.split("<")[1];
+        let question = questionStr.substring(questionStr.lastIndexOf(">") + 1)
+        let button = event.target.title;
+
+        if (question.trim() === returnAfterField) {
+            $( "#concept-set-bc3c7215-bb67-4532-a35c-af73e439d25b input[type='date']" ).last().val(obj[button]);
+        }
+    })
+}
+</script>

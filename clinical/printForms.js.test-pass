@@ -1,0 +1,32 @@
+
+function printForm(){
+  let hospitalName = "CURE Ethiopia Children's Hospital";
+  let allComponents = document.querySelectorAll('.patient-form-data');
+  let title = allComponents[0].querySelectorAll('.section-title');
+  let observations = allComponents[0].querySelectorAll('.hidden-print');
+  alert("Sorry for the inconvenience; this function will be reinstated soon.");
+  observations = observations[0].querySelectorAll('li.has-child');
+  var testData = $(observations)
+  console.log(testData)
+  console.log("Here the length of array: "+testData.length)
+  var counter =0;
+  observations.forEach(obs => {
+    try{
+      if(counter ==0){
+        var parentObs = obs.querySelectorAll('.tree-list-item');
+        parentObs.forEach(childObs => {
+          let innerChild1 = childObs.querySelectorAll('.testUnderPanel');
+          let innerChild2 = childObs.querySelectorAll('pre.left');
+          console.log(innerChild1[0].innerText)
+          if(innerChild2.length != 0){
+            console.log("==>"+innerChild2[0].innerText)
+          }
+        });
+      }
+      counter++
+      console.log("===========================/n"+counter)
+   }catch (err) {
+      console.log(err)
+    }
+  });
+}

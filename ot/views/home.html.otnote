@@ -1,0 +1,275 @@
+<!-- script>
+import Web3 from 'web3';
+fs.readFile("./customer.json", "utf8", (err, jsonString) => {
+  if (err) {
+    console.log("File read failed:", err);
+    return;
+  }
+  console.log("File data:", jsonString);
+});
+</script -->
+<div class="patient-info-fixed-postion-container ot-secondary-header">
+ <b><h4 style="font-size: 1.4em;"><span id="displayNoteId", style="font-weight: 700; color: red;margin: auto;position: absolute; left: 0; right: 0; top: 0; width: 500px; text-align: center; bottom: 0; height: 20px;"></span></h4></b>
+ <button class="back-btn dashboard-link ot-surgical-button" show-if-privilege="app:ot:write" ng-click="goToNewSurgicalAppointment()">
+        {{'NEW_SURGICAL_BLOCK' | translate}}
+ </button>
+</div>
+<div class="ot-filter-section">
+    <div class="ot-filter-items location-block">
+        <h4>{{'OT_OPERATION_THEATRE_LABEL' | translate}}</h4>
+        <p ng-repeat="location in locations track by location.uuid">
+            <span>{{ location.display }}</span>
+            <label class="location-buttons" for="{{location.display}}">
+                <input type="checkbox" id="{{location.display}}" name="location" ng-model="filters.locations[location.name]" required/>
+            </label>
+        </p>
+    </div>
+    <div class="ot-filter-items surgeon-block">
+        <h4>{{'OT_SURGEON_KEY' | translate}}</h4>
+        <multi-select-autocomplete input-items="surgeonList" selected-values="filters.providers" display-property="'name'" key-property="'uuid'" placeholder="'OT_ENTER_SURGEON_NAME_KEY'" load-on-down-arrow="false" auto-complete-min-length="1"></multi-select-autocomplete>
+    </div>
+    <div class="ot-filter-items patient-block">
+        <h4>{{'OT_PATIENT' | translate}}</h4>
+        <p>
+            <input type="text" id="patient-ot-filter" min-length="2" bahmni-autocomplete ng-model="patient" source="search" response-map="responseMap" on-select="onSelectPatient" ng-change="clearThePatientFilter()" strict-select="true" ng-class="{'illegalValue': isInvalid}" placeholder="{{'OT_ENTER_PATIENT_KEY' | translate }}"/>
+            <i class="fa fa-search" aria-hidden="true"></i>
+        </p>
+    </div>
+    <div class="ot-filter-items status-block">
+        <h4>{{'OT_APPOINTMENT_STATUS' | translate}}</h4>
+        <multi-select-autocomplete input-items="appointmentStatusList" selected-values="filters.statusList" display-property="'name'" key-property="'name'" placeholder="'OT_ENTER_STATUS_KEY'" load-on-down-arrow="false" auto-complete-min-length="1"></multi-select-autocomplete>
+    </div>
+    <div class="surgical-action-wrapper">
+        <button ng-click="applyFilters()">{{'OT_APPLY_FILTERS' | translate}}</button>
+        <button ng-click="clearFilters()">{{'OT_CLEAR_FILTERS' | translate}}</button>
+    </div>
+    <br /><br />
+    <div class="ot-filter-items status-block">
+	<h4>Schedule Note</h4>
+	<textarea id="noteid" name="note" rows="4" cols="32" placeholder="Enter Note" style="outline: 0;margin: 2px;padding: 0 0 0 5px;font: 14px "Helvetica Neue",Helvetica,Arial,sans-serif;"></textarea>
+   </div>
+   <div class="surgical-action-wrapper">
+        <button id="addNote" onclick="postUpdate()" style="float: right; box-shadow: 0 0 3px 0 rgb(0 0 0 / 30%); padding: 5px 10px; color: #000; border: 1px solid #95989a; margin-right: 10px; background: #fff;">Add Note</button>
+	<button id="delNote" onclick="deleteNote()" style="float: right; box-shadow: 0 0 3px 0 rgb(0 0 0 / 30%); padding: 5px 10px; color: #000; border: 1px solid #95989a; margin-right: 10px; background: #fff;">Delete</button>
+   </div>
+</div>
+
+<div class="ot-top-button-wrapper">
+    <p class="calendar-day-navigation" ng-if="weekOrDay === 'day'">
+        <span id="dayNavId" onclick="getCurrNote()"><button id="dayNavL" ng-click="goToPreviousDate(viewDate)"><i class="fa fa-angle-left"></i></button>
+        <button ng-click="goToCurrentDate()">{{'OT_TODAY_KEY' | translate}}</button>
+        <button id="dayNavR" type="button" ng-click="goToNextDate(viewDate)"><i class="fa fa-angle-right"></i></button></span>
+        <input id="datePickerId" onchange="getSelectedDate()" type="date" ng-model="string" ng-change="goToSelectedDate(string)">
+    </p>
+    <p class="calendar-day-navigation" ng-if="weekOrDay === 'week'">
+        <button ng-click="goToPreviousWeek()"><i class="fa fa-angle-left"></i></button>
+        <button ng-click="goToCurrentWeek()">{{'OT_THIS_WEEK_KEY' | translate}}</button>
+        <button type="button" ng-click="goToNextWeek()"><i class="fa fa-angle-right"></i></button>
+    </p>
+
+    <p id="noteDate" class="calendar-current-day" ng-if="weekOrDay === 'day'">
+        {{viewDate | date : 'dd MMM yyyy, EEE'}}
+    </p>
+
+    <p class="calendar-current-day" ng-if="weekOrDay === 'week'">
+        {{weekStartDate | date : 'dd MMM yyyy, EEE'}} to {{weekEndDate | date : 'dd MMM yyyy, EEE'}}
+    </p>
+
+
+    <p ng-show="view === 'List View'" class="day-btn-container">
+        <input type="radio" name="weekOrDay" id="week-button" ng-model="weekOrDay" value="week" ng-click="goToCurrentWeek()" required/>
+        <label for="week-button">{{'OT_WEEK_KEY' | translate}}</label>
+        <input type="radio" name="weekOrDay" id="day-button" ng-model="weekOrDay" value="day" ng-click="goToCurrentDate()" required/>
+        <label for="day-button">{{'OT_DAY_KEY' | translate}}</label>
+    </p>
+    <p class="calendar-btn-container">
+        <input type="radio" name="view" id="calendar-button" ng-model="view" value="Calendar" ng-click="calendarView()" required/>
+        <label for="calendar-button">{{'OT_CALENDAR_KEY' | translate}}</label>
+
+        <input type="radio" name="view" id="list-view-button" ng-model="view" value="List View" ng-click="listView()" required/>
+        <label for="list-view-button">{{'OT_LIST_VIEW_KEY' | translate}}</label>
+    </p>
+</div>
+
+<div class="calander-container">
+    <ot-calendar ng-if="view === 'Calendar'" view-date="viewDate" day-view-start="calendarConfig.dayViewStart" day-view-end="calendarConfig.dayViewEnd" day-view-split="calendarConfig.dayViewSplit" filter-params="filterParams">
+    </ot-calendar>
+
+    <list-view ng-if="view === 'List View'" week-start-date="weekStartDate" week-end-date="weekEndDate" view-date="viewDate" week-or-day="weekOrDay" filter-params="filterParams">
+    </list-view>
+
+</div>
+<div class="surgical-action-wrapper">
+    <button show-if-privilege="app:ot:write" ng-disabled="addActualTimeDisabled" ng-mousedown="addActualTime()">{{'OT_ADD_ACTUAL_TIME_KEY' | translate}}</button>
+    <button show-if-privilege="app:ot:write" ng-disabled="editDisabled" ng-mousedown="goToEdit($event)">{{'OT_EDIT_KEY' | translate}}</button>
+    <button show-if-privilege="app:ot:write" ng-disabled="moveButtonDisabled" ng-mousedown="gotoMove()">{{'OT_MOVE_KEY' | translate}}</button>
+    <button show-if-privilege="app:ot:write" ng-disabled="cancelDisabled" ng-mousedown="cancelSurgicalBlockOrSurgicalAppointment()">{{'OT_CANCEL_KEY' | translate}}</button>
+</div>
+
+<script src="https://ajax.googleapis.com/ajax/libs/jquery/3.5.1/jquery.min.js"></script>
+<script>
+
+	var dayName = ["Sun","Mon","Tue","Wed","Thu","Fri","Sat","Sun"];
+        var monthName = ["Jan","Feb","Mar","Apr","May","Jun","Jul","Aug","Sep","Oct","Nov","Dec"];
+        todayDate = new Date();
+
+        var today = getDay(todayDate) + " " + monthName[todayDate.getMonth()] + " " + todayDate.getFullYear() + ", " + dayName[todayDate.getDay()];
+
+
+    function getDay(date) {
+  	var day = date.getDate();
+  	return day < 10 ? '0' + day : '' + day;
+    }
+
+    $(document).ready(function(){
+	/*var dayName = ["Sun","Mon","Tue","Wed","Thu","Fri","Sat","Sun"];
+	var monthName = ["Jan","Feb","Mar","Apr","May","Jun","Jul","Aug","Sep","Oct","Nov","Dec"];
+	todayDate = new Date();
+
+	var today = getDay(todayDate) + " " + monthName[todayDate.getMonth()] + " " + todayDate.getFullYear() + ", " + dayName[todayDate.getDay()];*/
+
+	console.log("Today's date: " + today);	
+
+	$('#datePickerId').change(function() {
+		console.log("datepicker value: ************ " + $('#selectedDateId').val());
+	});
+	
+	
+	var origDate = $.trim($("#noteDate").text());
+	
+   	//function getTodaysNote(today) {
+	window.getTodaysNote = function(today) {
+	   $.ajax({
+		url: 'https://ethiopia.emr.cure.org/ot-notes/api/note/'+today,
+		contentType: "application/json",
+		dataType: 'json',
+		success: function(data){
+		   console.log("Note Description>>>>>>>>>>>>>>>>>>>>>>: " + data.description);
+		   if(data !== 'undefined' && data !== '') {
+		      var noteDesc = data.description;
+		      $('#displayNoteId').text(noteDesc);
+		      //$('#displayNoteId').text(data[Object.keys(data)].description);
+		      $('#noteid').val(noteDesc);
+		      $('#addNote').html("Update Note");
+		      $('#delNote').show();
+	              console.log("is condition true: " + data.description);
+		   } else {
+		      console.log("is condition false: " + data.description); 
+		      $('#displayNoteId').text("");
+		      $('#noteid').val("");
+		      $('#addNote').html("Add Note");
+		      $('#delNote').hide();
+		   }
+		},
+		error: function (request, status, error) {
+        	  $('#displayNoteId').text("");
+		  $('#delNote').hide();
+		  $('#noteid').val("");
+		  $('#addNote').html("Add Note");
+    		}
+	   });      
+        }
+	
+
+	var timeDelay = 10000;
+	setTimeout(getTodaysNote(today), timeDelay);
+	
+	$("#dayNavId button").on("click", "i", function() {
+	   console.log('finally clicked!!!');
+	});
+	
+
+	//$('#addNote').click(function() {
+	window.addNote = function() {
+	   var description = $('#noteid').val();
+	   var schedule = $.trim($('#noteDate').text());
+	
+	   $.post('https://ethiopia.emr.cure.org/ot-notes/api/addNote?description='+description+'&schedule='+schedule,   // url
+		function(data, status, jqXHR) {// success callback
+		console.log('Status: ' + status);
+		//$('#noteid').val(""); // empty the field after submission
+	   });
+	}
+
+	window.noteUpdate = function() {
+	   var description = $('#noteid').val();
+	   var schedule = $.trim($('#noteDate').text());
+
+	   $.ajax({
+		type: "Put",
+		url: "https://ethiopia.emr.cure.org/ot-notes/api/updateNote/"+schedule+"?description="+description,
+		contentType: "application/json; charset=utf-8",
+		dataType: 'json',
+		success: function(data) {
+		   console.log("Updated successfully");
+		}
+	   });
+	}
+
+      window.noteDeletion = function() {
+         var description = $('#noteid').val();
+         var schedule = $.trim($('#noteDate').text());
+         $.ajax({
+            type: "Delete",
+            url: "https://ethiopia.emr.cure.org/ot-notes/api/deleteNote/"+schedule,
+            contentType: "application/json; charset=utf-8",
+            dataType: 'json',
+            success: function(data) {
+               console.log("Delete successfully");
+            }
+         });
+      }
+
+
+    });
+
+
+    function getCurrNote() {
+	//setTimeout(function() { getTodaysNote(today);}, 5000);
+	const element = document.getElementById('noteDate'); // Get desired HTML element
+	const currDate = element.textContent.trim();
+	console.log("get current note: " + document.getElementById('noteid').value);
+	console.log("get Current Date: " + currDate); // Get text of element & display in console 
+	getTodaysNote(currDate);
+    }
+
+    function postNote() {
+	addNote();
+	const element = document.getElementById('noteDate'); // Get desired HTML element
+        const currDate = element.textContent.trim();
+	console.log(currDate);
+	getCurrNote();
+    }
+
+   function updateNote() {
+      noteUpdate();
+      const element = document.getElementById('noteDate');
+      const currDate = element.textContent.trim();
+      console.log(currDate);
+      getCurrNote();
+   }
+
+   function deleteNote() {
+      noteDeletion();
+      const element = document.getElementById('noteDate');
+      const currDate = element.textContent.trim();
+      console.log("from delete: " + currDate);
+      getCurrNote();
+   }
+
+   function postUpdate() {
+      var btnType = document.getElementById('addNote').innerText;
+      if(btnType == "Add Note") {
+	postNote();
+      } else {
+	updateNote();
+      }
+   }
+   function getSelectedDate() {
+      var selectedDate = document.getElementById('datePickerId').value;
+      var noteDate = document.getElementById('noteDate').textContent.trim();
+      console.log("Get selected date >>>>>>>>>>>>>>>>>> : " +  selectedDate + " complete displayed date: " + noteDate);
+      getCurrNote();
+   }
+</script>
+

@@ -1,0 +1,71 @@
+<script>
+function importInfo() {
+  getLastDiagosis();
+  getLastOrthopedicReport();
+}
+
+function getLastDiagosis() {
+  var uuid = document.getElementById('idToPass').innerHTML;
+  fetch('https://192.168.1.13/openmrs/ws/rest/v1/obs?patient='+uuid+'&concept=81c7149b-3f10-11e4-adec-0800271c1b75&limit=1', {
+    credentials: 'include',
+  })
+  .then(res => res.json())
+  .then(json => getValue(JSON.stringify(json.results[0]['display'])));
+
+  function getValue(s) {
+    var end = s.length - 1;
+    var start = s.lastIndexOf(":") + 1;
+    var d = s.substring(start, end);
+    document.getElementsByName("Recent Diagnosis Name")[0].value = d;
+  }
+}
+
+function getLastOrthopedicReport() {
+  var uuid = document.getElementById('idToPass').innerHTML;
+  fetch('https://192.168.1.13/openmrs/ws/rest/v1/obs?patient='+uuid+'&concept=c4aff83c-b8d6-4172-8dc5-4d611c5c51d7&limit=1', {
+    credentials: 'include',
+  })
+  .then(res => res.json())
+  .then(json => getValue(JSON.stringify(json.results[0]['display'])));
+
+  function getValue(s) {
+    var end = s.length - 1;
+    var start = s.lastIndexOf(":") + 1;
+    var d = s.substring(start, end);
+    document.getElementsByName("Orthopedic Operative Report")[0].value = d;
+  }
+}
+
+</script>
+<div id="idToPass" style="display:none;">{{patient.uuid}}</div>
+<div id="{{conceptSet.id}}" style="position: relative">
+    <div class="concept-set-title">
+        <div id="{{getNormalized(conceptSet.conceptName)}}">
+            <h2 class="section-title">
+                <span class="section-label">{{conceptSet.label}}</span>  <!--<button id="importInfo" name="{{conceptSet.uuid}}" onClick='importInfo();'>Import Info</button>-->
+            </h2>
+            <div class="form-actions fr">
+                <button type="button" ng-if="conceptSet.isOpen" ng-click="conceptSet.maximizeInnerSections($event)" title="{{ ::'CONCEPT_SET_GROUP_EXPAND_ALL_KEY' | translate}}">
+                       <i class="fa icon-bahmni-expand"></i>
+                </button>
+                <button type="button" ng-if="conceptSet.isOpen" ng-click="conceptSet.minimizeInnerSections($event)" title="{{ ::'CONCEPT_SET_GROUP_COLLAPSE_ALL_KEY' | translate}}">
+                    <i class="fa icon-bahmni-collapse"></i>
+                </button>
+                <label class="add-fav" title="{{ ::'CONCEPT_SET_GROUP_PIN_UNPIN_KEY' | translate}}">
+                    <input type="checkbox" id="hasOldIdentifier" ng-model="conceptSet.alwaysShow" ng-change="togglePref(conceptSet, conceptSet.conceptName)"/>
+                    <i class="fa fa-thumb-tack"></i>
+                </label>
+                <button type="button" ng-confirm-click="remove($index)" ng-disabled="!canRemove($index)" title="{{ ::'CONCEPT_SET_GROUP_REMOVE_KEY' | translate}}" confirm-message="{{::'REMOVE_CONFIRMATION_KEY' | translate}}">
+                        <i class="fa fa-trash"></i>
+                </button>
+            </div>
+        </div>
+    </div>
+    <div ng-if="!isFormTemplate(conceptSet)">
+        <concept-set ng-if="conceptSet.isLoaded" patient="::patient" ng-show="conceptSet.isOpen" collapse-inner-sections="conceptSet.collapseInnerSections" concept-set-name="::conceptSet.conceptName" required="conceptSet.options.required" at-least-one-value-is-set="conceptSet.atLeastOneValueIsSet" observations="conceptSet.observations" show-title="::false" validation-handler="::validationHandler" section-id="conceptSet.id">
+        </concept-set>
+    </div>
+    <div ng-if="isFormTemplate(conceptSet)" id="{{::conceptSet.formUuid}}">
+        <form-controls form="conceptSet" patient="patient" validate-form="false"></form-controls>
+    </div>
+</div>

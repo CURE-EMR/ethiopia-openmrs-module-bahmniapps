@@ -1,0 +1,57 @@
+<div class="patient-info-fixed-postion-container" id="patientContext">
+   <div class="patient-info-fixed">
+      <ul>
+         <li class="patient-name-image-container">
+            <img class="patient-image" fallback-src="../images/blank-user.gif" src="/openmrs/ws/rest/v1/patientImage?patientUuid=cb9b0fc1-2c17-4cf0-b9c9-7f98b8e53f84" ng-src="/openmrs/ws/rest/v1/patientImage?patientUuid=cb9b0fc1-2c17-4cf0-b9c9-7f98b8e53f84">
+            <span class="patient-name">
+            {{patient.name}}
+            </span>
+            <span class="patient-name">
+            {{patient.identifier}}
+            </span>
+         </li>
+         <li>Gender: {{patient.gender}}</li>
+         <li>Age: {{patient.age}} </li>
+         <li>Date of Birth: {{patient.birthdate | bahmniDate}} </li>
+      </ul>
+   </div>
+</div>
+<br/>
+<br/>
+<br/>
+
+<div>
+    <div>
+        <div ng-repeat="order in orders" class="concept-set-group section-grid order-fullfilment-contianer">
+            <div id="{{order.orderUuid}}" style="position: relative">
+                <div class="concept-set-title" ng-init="toggleShowOrderForm(order)" ng-click="toggleShowOrderForm(order)">
+                    <h2 class="section-title">
+                        <i class="fa fa-caret-right" ng-hide="order.showForm"></i>
+                        <i class="fa fa-caret-down" ng-show="order.showForm"></i>
+                        <span><b>Order Name</b>: {{order.concept.shortName || order.concept.name}}   |   <b>Order Date</b>: {{order.orderDate | bahmniDateTime}}</span>
+                        <!--<span class="fr">-->
+                        <!--<span class="has-notes fa fa-file-text-o" ng-if="order.commentToFulfiller"></span>-->
+                        <!--<span class="order-provider-nane">{{order.provider}}</span>-->
+                        <!--<span class="order-created-date">{{order.orderDate | bahmniDateTime}}</span>-->
+                        <!--</span>-->
+
+                        <span ng-if="!order.hasObservations" class="new-order-highlight">New</span>
+                    </h2>
+                </div>
+                <div ng-if="order.showForm">
+                    <orders-control patient="patient" order-uuid="order.orderUuid" config="config" message="message" show-title="false"></orders-control>
+                    <div>
+                        <i ng-if="::order.commentToFulfiller" class="fa fa-comments"></i>
+                        <span>{{order.commentToFulfiller}}</span>
+                    </div>
+                    <concept-set patient="patient" ng-if="order.showForm" concept-set-name="formName" observations="order.bahmniObservations" show-title="false" section-id="order.orderUuid">
+                    </concept-set>
+                </div>
+            </div>
+        </div>
+
+    </div>
+    <div ng-show="orders && orders.length == 0">
+        <div class="placeholder-text">{{getEmptyMessage()}}</div>
+    </div>
+</div>

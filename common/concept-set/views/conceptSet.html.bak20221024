@@ -1,0 +1,158 @@
+<form novalidate name="obsForm">
+    <div ng-if="::showEmptyConceptSetMessage" class="placeholder-text">{{::conceptSetName}} {{ 'CONCEPT_NOT_FOUND_MESSAGE'|translate }}</div>
+
+    <concept concept-set-required="conceptSetRequired" root-observation="rootObservation" patient="::patient" observation="rootObservation" at-least-one-value-is-set="atLeastOneValueIsSet" show-title="::showTitleValue" collapse-inner-sections="collapseInnerSections" ng-if="!rootObservation.hidden" concept-set-name="::conceptSetName" hide-abnormal-button="hideAbnormalButton">
+    </concept>
+
+</form>
+
+<!-- Function to validate surgical start and end time-->
+<script>
+  function validateForm(){
+        const entOperativeReport = document.getElementById("concept-set-6690d105-8eb5-4e40-9063-390ff353021e");
+	const orthopaedicOperativeReport = document.getElementById("concept-set-c4aff83c-b8d6-4172-8dc5-4d611c5c51d7");
+	const cleftOperativeReport = document.getElementById("concept-set-f8125986-7ab3-4cef-be67-c8c220299a51");
+        if(entOperativeReport){
+                $("#concept-set-6690d105-8eb5-4e40-9063-390ff353021e datetimepicker").first().find(".ng-pristine.ng-untouched.ng-valid").eq(0).prop('name','surgicalStartDate');
+                $("#concept-set-6690d105-8eb5-4e40-9063-390ff353021e datetimepicker").first().find(".ng-pristine.ng-untouched.ng-valid").eq(1).prop('name','surgicalStartTime');
+                $("#concept-set-6690d105-8eb5-4e40-9063-390ff353021e datetimepicker").last().find(".ng-pristine.ng-untouched.ng-valid").eq(0).prop('name','surgicalEndDate');
+                $("#concept-set-6690d105-8eb5-4e40-9063-390ff353021e datetimepicker").last().find(".ng-pristine.ng-untouched.ng-valid").eq(1).prop('name','surgicalEndTime');
+                let varSurgicalStartDate = (new Date(document.forms["obsForm"]["surgicalStartDate"].value)).toISOString().slice(0, 10);
+                let varSurgicalStartTime = document.forms["obsForm"]["surgicalStartTime"].value;
+                let varSurgicalEndDate = (new Date(document.forms["obsForm"]["surgicalEndDate"].value)).toISOString().slice(0, 10);
+                let varSurgicalEndTime = document.forms["obsForm"]["surgicalEndTime"].value;
+                if(varSurgicalStartDate > varSurgicalEndDate){
+                        alert("Surgical Finish Time must be greater than Anesthesia Start Time or must be on the same day \n- please update the dates/times");
+                        //return;
+                }else if(varSurgicalStartTime > varSurgicalEndTime){
+                        alert("Surgical Finish Time must be greater than Anesthesia Start Time or must be on the same day \n- please update the dates/times");
+                }
+        }
+	if(orthopaedicOperativeReport){
+                $("#concept-set-c4aff83c-b8d6-4172-8dc5-4d611c5c51d7 datetimepicker").first().find(".ng-pristine.ng-untouched.ng-valid").eq(0).prop('name','surgicalStartDate');
+                $("#concept-set-c4aff83c-b8d6-4172-8dc5-4d611c5c51d7 datetimepicker").first().find(".ng-pristine.ng-untouched.ng-valid").eq(1).prop('name','surgicalStartTime');
+                $("#concept-set-c4aff83c-b8d6-4172-8dc5-4d611c5c51d7 datetimepicker").last().find(".ng-pristine.ng-untouched.ng-valid").eq(0).prop('name','surgicalEndDate');
+                $("#concept-set-c4aff83c-b8d6-4172-8dc5-4d611c5c51d7 datetimepicker").last().find(".ng-pristine.ng-untouched.ng-valid").eq(1).prop('name','surgicalEndTime');
+                let varSurgicalStartDate = (new Date(document.forms["obsForm"]["surgicalStartDate"].value)).toISOString().slice(0, 10);
+                let varSurgicalStartTime = document.forms["obsForm"]["surgicalStartTime"].value;
+                let varSurgicalEndDate = (new Date(document.forms["obsForm"]["surgicalEndDate"].value)).toISOString().slice(0, 10);
+                let varSurgicalEndTime = document.forms["obsForm"]["surgicalEndTime"].value;
+                if(varSurgicalStartDate > varSurgicalEndDate){
+                        alert("Surgical Finish Time must be greater than Anesthesia Start Time or must be on the same day \n- please update the dates/times");
+                        //return;
+                }else if(varSurgicalStartTime > varSurgicalEndTime){
+                        alert("Surgical Finish Time must be greater than Anesthesia Start Time or must be on the same day \n- please update the dates/times");
+                }
+        }
+	if(cleftOperativeReport){
+                $("#concept-set-f8125986-7ab3-4cef-be67-c8c220299a51 datetimepicker").first().find(".ng-pristine.ng-untouched.ng-valid").eq(0).prop('name','surgicalStartDate');
+                $("#concept-set-f8125986-7ab3-4cef-be67-c8c220299a51 datetimepicker").first().find(".ng-pristine.ng-untouched.ng-valid").eq(1).prop('name','surgicalStartTime');
+                $("#concept-set-f8125986-7ab3-4cef-be67-c8c220299a51 datetimepicker").last().find(".ng-pristine.ng-untouched.ng-valid").eq(0).prop('name','surgicalEndDate');
+                $("#concept-set-f8125986-7ab3-4cef-be67-c8c220299a51 datetimepicker").last().find(".ng-pristine.ng-untouched.ng-valid").eq(1).prop('name','surgicalEndTime');
+                let varSurgicalStartDate = (new Date(document.forms["obsForm"]["surgicalStartDate"].value)).toISOString().slice(0, 10);
+                let varSurgicalStartTime = document.forms["obsForm"]["surgicalStartTime"].value;
+                let varSurgicalEndDate = (new Date(document.forms["obsForm"]["surgicalEndDate"].value)).toISOString().slice(0, 10);
+                let varSurgicalEndTime = document.forms["obsForm"]["surgicalEndTime"].value;
+                if(varSurgicalStartDate > varSurgicalEndDate){
+                        alert("Surgical Finish Time must be greater than Anesthesia Start Time or must be on the same day \n- please update the dates/times");
+                        //return;
+                }else if(varSurgicalStartTime > varSurgicalEndTime){
+                        alert("Surgical Finish Time must be greater than Anesthesia Start Time or must be on the same day \n- please update the dates/times");
+                }
+        }
+  }
+</script>
+
+<script>
+  const entOperativeReport = document.getElementById("concept-set-6690d105-8eb5-4e40-9063-390ff353021e");
+  const orthopaedicOperativeReport = document.getElementById("concept-set-c4aff83c-b8d6-4172-8dc5-4d611c5c51d7");
+  const cleftOperativeReport = document.getElementById("concept-set-f8125986-7ab3-4cef-be67-c8c220299a51");
+  if(entOperativeReport || orthopaedicOperativeReport || cleftOperativeReport){
+        $('button.confirm.save-consultation.hideSaveText').attr('onClick' , 'return validateForm()')
+  }
+</script>
+
+
+
+<script>
+const eq5dy = document.getElementById("concept-set-2afb49f9-721a-4c34-b7c2-2d823156f830");
+if (eq5dy) {
+    var currentNext6Date = new Date();
+    currentNext6Date.setMonth(currentNext6Date.getMonth() + 6);
+    var currentNext12Date = new Date();
+    currentNext12Date.setMonth(currentNext12Date.getMonth() + 12);
+    let returnAfterField = 'Return after:';
+    let returnAfterFieldAnswers = '{ "6 Months": "'+currentNext6Date.toISOString().slice(0, 10)+'", "12 Months": "'+currentNext12Date.toISOString().slice(0, 10)+'"}';
+    const obj = JSON.parse(returnAfterFieldAnswers);
+    //let returnAfterFieldAnswers = new O
+    const wrapper = document.getElementById("concept-set-2afb49f9-721a-4c34-b7c2-2d823156f830");
+    wrapper.addEventListener('click', (event) => {
+        const isButton = event.target.nodeName === 'BUTTON';
+        if (!isButton) {
+            return;
+        }
+	let questionStr = event.target.closest('fieldset').getElementsByTagName('label')[0].innerHTML.split("<")[1];
+        let question = questionStr.substring(questionStr.lastIndexOf(">") + 1)
+        let button = event.target.title;
+
+        if (question.trim() === returnAfterField) {
+           $( "#concept-set-2afb49f9-721a-4c34-b7c2-2d823156f830 input[type='date']" ).last().val(obj[button]);
+	   //document.getElementById("concept-set-2afb49f9-721a-4c34-b7c2-2d823156f830").querySelector('input:last-of-type').value = obj[button];
+        }
+    })
+}
+</script>
+
+<script>
+const schoolWhodas = document.getElementById("concept-set-0d938e9b-3e46-4299-813c-b1ef13976540");
+if (schoolWhodas) {
+    var currentNext6Date = new Date();
+    currentNext6Date.setMonth(currentNext6Date.getMonth() + 6);
+    var currentNext12Date = new Date();
+    currentNext12Date.setMonth(currentNext12Date.getMonth() + 12);
+    let returnAfterField = 'Return after:';
+    let returnAfterFieldAnswers = '{ "6 Months": "'+currentNext6Date.toISOString().slice(0, 10)+'", "12 Months": "'+currentNext12Date.toISOString().slice(0, 10)+'"}';
+    const obj = JSON.parse(returnAfterFieldAnswers);
+    const wrapper = document.getElementById("concept-set-0d938e9b-3e46-4299-813c-b1ef13976540");
+    wrapper.addEventListener('click', (event) => {
+        const isButton = event.target.nodeName === 'BUTTON';
+        if (!isButton) {
+            return;
+        }
+	let questionStr = event.target.closest('fieldset').getElementsByTagName('label')[0].innerHTML.split("<")[1];
+        let question = questionStr.substring(questionStr.lastIndexOf(">") + 1)
+        let button = event.target.title;
+
+        if (question.trim() === returnAfterField) {
+            $( "#concept-set-0d938e9b-3e46-4299-813c-b1ef13976540 input[type='date']" ).last().val(obj[button]);
+        }
+    })
+}
+</script>
+
+<script>
+const nonSchoolWhodas = document.getElementById("concept-set-bc3c7215-bb67-4532-a35c-af73e439d25b");
+if (nonSchoolWhodas) {
+    var currentNext6Date = new Date();
+    currentNext6Date.setMonth(currentNext6Date.getMonth() + 6);
+    var currentNext12Date = new Date();
+    currentNext12Date.setMonth(currentNext12Date.getMonth() + 12);
+    let returnAfterField = 'Return after:';
+    let returnAfterFieldAnswers = '{ "6 Months": "'+currentNext6Date.toISOString().slice(0, 10)+'", "12 Months": "'+currentNext12Date.toISOString().slice(0, 10)+'"}';
+    const obj = JSON.parse(returnAfterFieldAnswers);
+    const wrapper = document.getElementById("concept-set-bc3c7215-bb67-4532-a35c-af73e439d25b");
+    wrapper.addEventListener('click', (event) => {
+        const isButton = event.target.nodeName === 'BUTTON';
+        if (!isButton) {
+            return;
+        }
+        let questionStr = event.target.closest('fieldset').getElementsByTagName('label')[0].innerHTML.split("<")[1];
+        let question = questionStr.substring(questionStr.lastIndexOf(">") + 1)
+        let button = event.target.title;
+
+        if (question.trim() === returnAfterField) {
+            $( "#concept-set-bc3c7215-bb67-4532-a35c-af73e439d25b input[type='date']" ).last().val(obj[button]);
+        }
+    })
+}
+</script>

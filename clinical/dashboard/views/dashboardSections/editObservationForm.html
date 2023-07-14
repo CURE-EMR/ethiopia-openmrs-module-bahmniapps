@@ -1,0 +1,36 @@
+<edit-observation observation="ngDialogData.observation" concept-set-name="{{ngDialogData.conceptSetName}}" concept-display-name="{{ngDialogData.conceptDisplayName}}" focus-on-input-errors></edit-observation>
+<script>
+setTimeout(function(){
+      const parent = document.querySelectorAll('.template-container');
+      const element = document.querySelectorAll('.template-container h2.section-title');
+      if(element[0].innerHTML === 'EQ-5D-Y' || element[0].innerHTML === 'SF-12 WHODAS for school-going child' || element[0].innerHTML ==='SF-12 WHODAS for non school-going child'){
+	var currentVisitDate = parent[0].querySelectorAll(".leaf-observation-node .form-group .field-value input.ng-pristine:nth-child(1)")
+	console.log(currentVisitDate)
+        //currentVisitDate[1].setAttribute("id", "next_visit_date");
+      	//alert("good to go")
+        const wrapper = document.querySelectorAll('.template-container');
+    	wrapper[0].addEventListener('click', (event) => {
+        	const isButton = event.target.nodeName === 'BUTTON';
+            if (!isButton) {
+               return;
+            }
+            var currentNext6Date  =new Date(currentVisitDate[0].value);
+	    var currentNext12Date =new Date(currentVisitDate[0].value);
+            currentNext6Date.setMonth(currentNext6Date.getMonth() + 6);
+            currentNext12Date.setMonth(currentNext12Date.getMonth() + 12);
+            let returnAfterField = 'Return after:';
+            let returnAfterFieldAnswers = '{ "6 Months": "'+currentNext6Date.toISOString().slice(0, 10)+'", "12 Months": "'+currentNext12Date.toISOString().slice(0, 10)+'"}';
+	    const obj = JSON.parse(returnAfterFieldAnswers);
+
+            let questionStr = event.target.closest('fieldset').getElementsByTagName('label')[0].innerHTML.split("<")[1];
+            let question = questionStr.substring(questionStr.lastIndexOf(">") + 1)
+            let button = event.target.title;
+            if (question.trim() === returnAfterField) {
+                console.log("Next Date is"+ obj[button])
+		currentVisitDate[1].value = obj[button];
+                currentVisitDate[1].dispatchEvent(new Event('change'))
+            }
+        });
+      }
+}, 5000);
+ </script>

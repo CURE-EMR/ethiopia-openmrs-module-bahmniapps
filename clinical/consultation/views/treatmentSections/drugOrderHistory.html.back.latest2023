@@ -1,0 +1,345 @@
+<section class="drug-orders-history" xmlns="http://www.w3.org/1999/html" xmlns="http://www.w3.org/1999/html">
+    <div ng-if="drugOrderGroupsEmpty()">
+        <p class="placeholder-text">{{'MEDICATION_NO_PRESCRIPTION_SAVED_PLACEHOLDER'|translate}}</p>
+    </div>
+	<div class="inpage">
+		<div class="tabs">
+			<div class="tab" ng-repeat="drugOrderGroup in consultation.drugOrderGroups">
+				<input class="tab-radio" id="{{'drug-orders-tab-' + $index}}" name="tab-group-1" type="radio" ng-checked="drugOrderGroup.selected" ng-class="{}" tabindex="-1">
+				<label class="tab-label" for="{{'drug-orders-tab-' + $index}}">
+                    <span>{{drugOrderGroup.label | bahmniDate}}</span>
+                    <i class="fa fa-star current-visit-icon" title="Current visit" ng-if="drugOrderGroup.isCurrentVisit"></i>
+                </label>
+<!--		<button class="secondary-button refill-drugs-btn fr" style="margin-left:5px" onclick="printDescription()"  ng-if="!drugOrderGroupsEmpty()">P<u>r</u>int</button> -->
+                <button class="secondary-button refill-drugs-btn fr" ng-click="refillAll(drugOrderGroup.drugOrders)" ng-if="!drugOrderGroupsEmpty()">{{ ::'MEDICATION_REFILL_ALL' | translate }}</button>
+                <button ng-repeat="orderAttribute in getOrderAttributes()" class="secondary-button dispense-all-btn fr" show-if-privilege="{{dispensePrivilege}}" ng-if="!drugOrderGroupsEmpty()" ng-click="updateAllOrderAttributesByName(orderAttribute,drugOrderGroup)" ng-disabled="!canUpdateAtLeastOneOrderAttributeOfName(drugOrderGroup,orderAttribute.name)">
+                    <i ng-init="allOrderAttributesOfNameSet(drugOrderGroup,orderAttribute.name)" class="fa fa-check" ng-show="drugOrderGroup[orderAttribute.name].selected"></i>
+                    {{orderAttribute.name}} All
+                </button>
+                <div class="inpage-tab-panel">
+					<div class="inpage-tab-content">
+                        <p ng-if="!drugOrderGroup.drugOrders.length" class="placeholder-text">{{ ::'MEDICATION_NO_RECENT_TREATMENT' | translate }}</p>
+                        <ul class="table-mimic">
+							<li id="ordered-drug-orders" ng-repeat="drugOrder in drugOrderGroup.drugOrders" ng-class="{'active-drug' : drugOrder.isActive(), 'highlight' : drugOrder.isBeingEdited, 'scheduled-drug': drugOrder.isScheduled()}">
+                                <div class="drug-details" ng-class="{'strike-through': drugOrder.isDiscontinuedOrStopped()}">
+                                    <strong class="drug-name">{{drugOrder.getDisplayName()}}</strong>
+                                    {{drugOrder.getDescriptionWithQuantity()}}
+                                </div>
+								<div class="button-group-wrapper">
+                                    <div class="button-group" style="margin-left: -12px">
+                                        <button ng-repeat="orderAttribute in drugOrder.orderAttributes" show-if-privilege="{{dispensePrivilege}}" class="dispense-btn" ng-disabled="shouldBeDisabled(drugOrder,orderAttribute)" ng-click="updateOrderAttribute(drugOrder,orderAttribute)">
+                                            <i class="fa fa-check" ng-show="orderAttribute.value"></i>
+                                            {{orderAttribute.name.substring(0,1)}}
+                                        </button>
+                                        <button ng-disabled="!drugOrder.isActive() || !drugOrder.isEditAllowed" ng-click="revise(drugOrder, drugOrderGroup.drugOrders)">
+                                            <i class="fa fa-edit"></i>
+                                        </button>
+                                        <button class="undo-btn" ng-if="drugOrder.isMarkedForDiscontinue" ng-disabled="!drugOrder.isActive() || !drugOrder.isDiscontinuedAllowed" ng-click="undoDiscontinue(drugOrder)">
+                                            <i class="fa fa-undo"></i>
+                                        </button>
+                                        <button class="stop-drug-btn" ng-if="!drugOrder.isMarkedForDiscontinue" ng-disabled="!drugOrder.isActive() || !drugOrder.isDiscontinuedAllowed" ng-click="discontinue(drugOrder)">
+                                            {{ ::'MEDICATION_STOP' | translate }}
+                                        </button>
+                                        <button class="refill-btn" ng-disabled="!drugOrder.effectiveStopDate || drugOrder.isDrugRetired" ng-click="refill(drugOrder)">
+                                            {{ ::'MEDICATION_REFILL' | translate }}
+                                        </button>
+                                        <button class="toggle" ng-class="{'has-notes': drugOrder.additionalInstructions}" ng-click="toggleShowAdditionalInstructions(drugOrder)">
+                                            <i class="fa fa-plus-circle" ng-show="drugOrder.showAdditionalInstructions"></i>
+                                            <i class="fa fa-minus-circle" ng-hide="drugOrder.showAdditionalInstructions"></i>
+                                        </button>
+					<button class="dispense-btn print-description-button">P</button>
+                                    </div>
+								</div>
+                                <div class="start-date fr">
+                                    <span ng-if="showEffectiveFromDate(drugOrderGroup.visitStartDate, drugOrder.effectiveStartDate)"> {{ ::'MEDICATION_STARTED_ON' | translate }} {{drugOrder.effectiveStartDate | bahmniDate}}</span>
+                                    <span class="stop-date">
+                                        <div ng-if="drugOrder.isDiscontinuedOrStopped()">{{ ::'MEDICATION_STOPPED_ON' | translate }} {{drugOrder.dateStopped | bahmniDate}}</div>
+                                        <div ng-if="drugOrder.orderReasonText && drugOrder.isDiscontinuedOrStopped()">{{ ::'MEDICATION_DUE_TO' | translate }} {{drugOrder.orderReasonText}}</div>
+                                        <div ng-if="getOrderReasonConcept(drugOrder) && drugOrder.isDiscontinuedOrStopped()">({{getOrderReasonConcept(drugOrder)}})</div>
+                                    </span>
+                                </div>
+                                <div ng-hide="drugOrder.showAdditionalInstructions" class="notes inline-notes">
+				    <span class="prescriber-name"> {{drugOrder.additionalInstructions}} </span>
+                                    <div class="footer-note fr">
+                                        <span class="time-stamp">
+                                            <span class="time">{{drugOrder.dateActivated | bahmniDate}}</span>
+                                        </span>
+                                        <span class="provider">
+                                            <provider-directive creator-name="{{drugOrder.creatorName}}" provider-name="{{drugOrder.provider.name}}"></provider-directive>
+                                        </span>
+                                    </div>
+                                </div>
+                                <div ng-if="drugOrder.isMarkedForDiscontinue">
+                                    <div class="form fl drug-stop-container">
+                                        <article class="form-field">
+                                            <div class="field-attribute stop-date-label">
+                                                <label class="control-label">{{ ::'DRUG_DETAILS_STOP_DATE' | translate }}</label>
+                                            </div>
+                                            <div class="field-value">
+                                                <input id="date-stopped" type="date" min="{{getMinDateForDiscontinue(drugOrder)}}" max="{{scheduledDate}}" ng-model="drugOrder.dateStopped" required="required">
+                                            </div>
+                                            <div class="field-value">
+                                                <select id="stopped-reason" class="form-field instruction" ng-change="updateFormConditions(drugOrder)" ng-model="drugOrder.orderReasonConcept" ng-options="item as item.display for item in stoppedOrderReasons">
+                                                    <option value="">{{ 'MEDICATION_RECENT_TAB_STOP_REASON' | translate }}</option>
+                                                </select>
+                                            </div>
+                                            <div class="field-value">
+                                                <textarea ng-disabled="!drugOrder.orderReasonNotesEnabled" rows="1" id="stopped-reason-non-coded" class="form-field drug-order-notes" placeholder="{{ 'MEDICATION_RECENT_TAB_STOP_NOTES' | translate}}" ng-model="drugOrder.orderReasonText"></textarea>
+                                            </div>
+                                        </article>
+                                    </div>
+                                </div>
+							</li>
+						</ul>
+					</div>
+				</div>
+			</div>
+		</div>
+	</div>
+</section>
+<script>
+setTimeout(function(){
+  // Get the button element
+  const myButton = document.querySelectorAll('.print-description-button');
+  // Add a click event listener to the button
+  console.log("am in!!!");
+  console.log("button number are: "+ myButton.length)
+  myButton.forEach(button =>{
+        button.addEventListener('click', () => {
+            try {
+                var uuid = document.getElementById('patient-id-attribute-rest').innerHTML;
+                var phoneNumberAttribute = "";
+                fetch('https://et.emr.cure.org/openmrs/ws/rest/v1/person/'+uuid+'/attribute/',{
+                  credentials: 'include',
+                })
+                .then(res => res.json())
+                .then(json => {
+                     for(const key in json.results){
+                         data = `${json.results[key]['display']}`;
+                         if(data.substring(0,data.lastIndexOf("=")).trim() == 'mobilePhone' ){
+                           console.log(data.substring(data.lastIndexOf("=")+1,data.length));
+                           phoneNumberAttribute = data.substring(data.lastIndexOf("=")+1,data.length);
+                           let hospitalName = "CURE Ethiopia Children's Hospital";
+                            let frame1 = document.createElement('iframe');
+                            frame1.name = "frame1";
+                            frame1.style.position = "absolute";
+                            frame1.style.top = "-1000000px";
+                            document.body.appendChild(frame1);
+                            let frameDoc = frame1.contentWindow ? frame1.contentWindow : frame1.contentDocument.document ? frame1.contentDocument.document : frame1.contentDocument;
+
+                            frameDoc.document.open();
+                            frameDoc.document.write('<!DOCTYPE html PUBLIC \"-//W3C//DTD XHTML 1.0 Transitional//EN\"  \"http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd\">');
+                            frameDoc.document.write('<html><head><style> * {-webkit-print-color-adjust: exact !important; color-adjust: exact !important;} #obs-table{ border-collapse: collapse; width: 100%}.patient-info{font-size: 16px;} table,td,th {padding: 10px; border: 1px solid black; border-collapse: collapse; } .info{display: inline-block; width:50px} .dispensers-footer{width: 150px; display: block; border-bottom: solid 1px black; } .presriber-uline{width: 200px; display: inline-block; border-bottom: solid 1px black; } .presriber-info{width: 170px; margin-left=10px;display: inline-block; }</style> </head>');
+                            frameDoc.document.write('<body style="margin: 5mm 10mm 5mm 10mm;">');
+                            frameDoc.document.write('<div style="text-align: center;"><table style="margin: auto;border:none; padding:0px;"><tr>');
+                            frameDoc.document.write(`<td style="border:none"><img src="https://cure.org/wp-content/themes/cure/images/logo.svg" alt="logo" style="width: 120px;"></td>`);
+                            frameDoc.document.write(`<td style="border:none"><span style="font-weight: bold ; font-size:22px; margin-left: 0px;">${hospitalName}</span></td>`);
+                            frameDoc.document.write('</tr></table>');
+                            //frameDoc.document.write(`<h3>${title[0].innerHTML}</h3></div>`);
+                            frameDoc.document.write(`<h3 style="text-transform: uppercase; font-size:36px;">Prescription</h3></div>`);
+                            frameDoc.document.write(`<strong>P.O.BOX 26134-1000 Addis Ababa, Ethiopia</br>TEL +251-1227520 /59/65/80 </strong></br></br>`);
+                    /**
+                             * Patient Information variables and data
+                             * =================================
+                            */
+                    // WEIGHT DATA
+                    //--------------
+                    var weight = "--";
+                    var nutritionalValue = document.querySelector('#Nutritional-Values .concept-set-container-view .print-observations');
+                    if(nutritionalValue != null){
+                        var nutritionalValueArray = nutritionalValue.querySelectorAll('show-observation');
+                        weight = nutritionalValueArray[1].querySelector('.value-text-only .left').innerText;
+                    }
+                    // VISIT TYPE
+                    // ----------
+
+                    var visitType = document.querySelector('#Visits #visitDisplayTable #eachVisit #visitType').innerText;
+
+                    // ALLERGIES DATA
+                    // --------------
+                    var allergies = "No Allergies recorded for this patient"
+                    var allergiesValue = document.querySelector('#Allergies .concept-set-container-view .print-observations show-observation .value-text-only .left');
+                    if(allergiesValue){
+                        allergies = allergiesValue.innerText;
+                    }
+                    // ALLERGIES DATA
+                            // --------------
+                    var diagnosis = "No Diagnosis"
+                    var diagnosisValue = document.querySelector('#Diagnosis #diagnosisSection .history-diagnosis .view-past #diagnosisName');
+                    if(diagnosisValue){
+                        diagnosis = diagnosisValue.innerText;
+                    }
+                    // PERSONAL DATA
+                            // --------------
+                            var patientName = document.getElementById("med-patient-name").innerHTML;
+                            var dob= document.getElementById("med-patient-dob").innerHTML;
+                            var age= calculate_age(new Date(document.getElementById("med-patient-dob").innerHTML))
+                            var gender = document.getElementById("med-patient-gender").innerHTML;
+                            var identifier = document.getElementById("med-patient-identifier").innerHTML;
+                    var phoneNumber = phoneNumberAttribute
+
+                    // PATIENT ADDRESS
+                    // ---------------
+                    var kebele = document.getElementById("patient-address-kebele").innerText;
+                    var woreda = document.getElementById("patient-address-woreda").innerText;
+                    var zone = document.getElementById("patient-address-zone").innerText;
+                    var region = document.getElementById("patient-address-region").innerText;
+                    var country = document.getElementById("patient-address-country").innerText;
+                        if(!country){
+                        country="Ethiopia"
+                    }
+                    /**
+                             * End- Patient Informatio
+                             * ======================================
+                            */
+                            frameDoc.document.write(`<div>`);
+                                    frameDoc.document.write(`<span class="patient-info" style="font-size:30px"><strong>Name of the Patient:</strong> <span>${patientName} ${identifier}</span> </br></br></span>`);
+                                    frameDoc.document.write(`<span class="patient-info"><strong>Sex:</strong> <span style="width:93px"class='info'>${gender}</span> <strong>Age:</strong> <span style="width:60px"class='info'>${age}</span>  <strong>Weight:</strong> <span style="width: 55px" class='info'> ${weight} kg</span></br></span>`);
+                        frameDoc.document.write(`<span class="patient-info"><strong>Kebele:</strong> <span> ${kebele} </span> </br></span>`);
+                        frameDoc.document.write(`<span class="patient-info"><strong>Woreda:</strong> <span> ${woreda} </span> </br></span>`);
+                        frameDoc.document.write(`<span class="patient-info"><strong>Zone:</strong> <span> ${zone} </span> </br></span>`);
+                        frameDoc.document.write(`<span class="patient-info"><strong>Region:</strong> <span> ${region} </span> </br></span>`);
+                        frameDoc.document.write(`<span class="patient-info"><strong>Country:</strong> <span> ${country} </span> </br></span>`);
+                        frameDoc.document.write(`<span class="patient-info"><strong>Tel No:</strong> <span>  ${phoneNumber} </span> </br></span>`);
+                        if(visitType == 'OPD'){
+                            frameDoc.document.write(`<span class="patient-info"><strong>Visit Type:</strong><input type="checkbox"  name="patient-type"> Inpatient &nbsp <input type="checkbox" checked name="patient-type"> Outpatient </br></span>`);             
+                        }else{
+                            frameDoc.document.write(`<span class="patient-info"><strong>Visit Type:</strong><input type="checkbox" checked name="patient-type"> Inpatient &nbsp <input type="checkbox" name="patient-type"> Outpatient </br></span>`)       
+                        }
+                                    frameDoc.document.write(`<span class="patient-info"><strong>Diagnosis (ICD code No):</strong> <span> ${diagnosis} </span> </br></span>`);
+                                frameDoc.document.write(`<span class="patient-info"><strong>Allergies:</strong> <span> ${allergies} </span> </br></span>`);
+                            frameDoc.document.write(`</div> </br></br>`);
+
+                    /**
+                     * Table global variable declaration
+                     * =================================
+                    */
+
+                        let prescriberName="";
+
+                            /**
+                             * End- Table global variable declaration
+                             * ======================================
+                            */
+
+                            frameDoc.document.write('<table>');
+                            frameDoc.document.write(`<div>`);
+                            frameDoc.document.write(`<table id="obs-table" style="border-collapse: collapse; width: 100% ;margin-bottom: 10px">`);
+                                    frameDoc.document.write(`<tr>`);
+                                            frameDoc.document.write(`<th>Drug Name, Strength, Dosage, Frequency, Duration, </br>How to use & Other Information</th>`);
+                                            frameDoc.document.write(`<th>Total Quantity </th>`);
+                                    frameDoc.document.write(`</tr>`);
+                                            try{
+                                                  // Get the parent div element
+                                                  const parentDiv = button.parentNode.parentNode.parentNode;
+                                  prescriberName = parentDiv.querySelector('.prescriber-name');
+                                  console.log(prescriberName.innerText);
+                                                  var medication = parentDiv.querySelectorAll('.drug-details');
+                                                    medication.forEach(info =>{
+                                                       //console.log(info.innerText);
+                                                       frameDoc.document.write(`<tr><td style="font-size:16px"><span>${info.innerText}</span></td>`);
+                                                       frameDoc.document.write(`<td style="font-size:16px"><span></span></td></tr>`);
+                                                    });
+                                                  // Get the parent div data
+                                                  // Display the parent div data
+                                                  //console.log(parentDiv);
+                                            }catch(err){
+                                                    console.log(err)
+                                            }
+                            frameDoc.document.write(`<tr> `);
+                                frameDoc.document.write(`<td colspan="2">`);
+                                  frameDoc.document.write(`<div style="display: inline-block; width: 400px; float: left;">`);
+                                    frameDoc.document.write(`<h3 style="font-size:16px">PRESCRIBER</h3>`);
+                                        frameDoc.document.write(`<span class="presriber-info">FULL NAME, MEDICAL LICENCE NUMBER</span><span class="presriber-uline">${prescriberName.innerText}</span></br></br>`);
+                                    currentDate = new Date();
+                                    var options = { year: 'numeric', month: 'long', day: 'numeric' };
+                                        frameDoc.document.write(`<span class="presriber-info">DATE</span><span> ${currentDate.toLocaleDateString("en-GB", options)}</span></br>`);
+                                  frameDoc.document.write(`</div>`);
+                                      frameDoc.document.write(`<div style="display: inline-block; width: 150px; float: right; margin-left: 20px;">`);
+                                    frameDoc.document.write(`<h3 style="font-size:16px">DISPENSER</h3></br>`);
+                                        frameDoc.document.write(`<span class="dispensers-footer"></span></br></br>`);
+                                        frameDoc.document.write(`<span class="dispensers-footer"></span></br></br>`);
+                                        frameDoc.document.write(`<span class="dispensers-footer"></span></br></br>`);
+                                    frameDoc.document.write(`</div>`);
+                                frameDoc.document.write(`</td>`);
+                            frameDoc.document.write(`</tr>`);
+                                    frameDoc.document.write(`</table>`);
+                            frameDoc.document.write(`</div>`);
+                            frameDoc.document.write('</body></html>');
+                            frameDoc.document.close();
+                            setTimeout(function () {
+                                // Method to add Title to the page
+                                window.frames["frame1"].onbeforeprint = (event) => {
+                                    let patientData = document.querySelectorAll('.patient-info-fixed');
+                                    let patientName = "";
+                                    patientData.forEach(patient => {
+                                        names_uuid = patient.querySelectorAll('.patient-name');
+                                        names_uuid.forEach(info => {
+                                            patientName = patientName + info.innerHTML;
+                                        });
+                                    });
+                                    document.title = `${patientName}_Prescription`;
+                                };
+                               window.frames["frame1"].focus();
+                                    window.frames["frame1"].print();
+                        //       alert("Service not Available now!")
+                                    document.body.removeChild(frame1);
+                                }, 500);
+                                return false;
+                         }
+                     }
+                });
+            } catch (err) {
+              console.log(err)
+              alert("This Data can't be printed!")
+              document.querySelector("body iframe:last-of-type").remove();
+              return;
+            }
+    });
+  })
+}, 4000);
+</script>
+
+<script>
+function calculate_age(dob) {
+    var diff_ms = Date.now() - dob.getTime();
+    var age_dt = new Date(diff_ms);
+
+    return Math.abs(age_dt.getUTCFullYear() - 1970);
+}
+
+/*$('.inpage-tab-content').on('click', function(){
+    console.log("Selected Tab-div is: "+$(this).index());
+});
+*/
+const divs = document.querySelectorAll('.tab'); // select all div elements
+
+  divs.forEach((div, index) => { // add click event listener to each div element
+    div.addEventListener('click', () => {
+      const classList = div.classList; // get the class list of the clicked div
+      const classIndex = Array.from(classList).indexOf('inpage-tab-content'); 
+      console.log(`Clicked div index: ${index}`);
+      console.log(`Index of 'example-class': ${classIndex}`);
+    });
+  });
+</script>
+<script>
+ async function retrievePhoneNumber(){
+	var uuid = document.getElementById('patient-id-attribute-rest').innerHTML;
+        var phoneNumberAttribute = "";
+        await fetch('https://et.emr.cure.org/openmrs/ws/rest/v1/person/'+uuid+'/attribute/',{
+          credentials: 'include',
+        })
+        .then(res => res.json())
+        .then(json => {
+             for(const key in json.results){
+                 data = `${json.results[key]['display']}`;
+                 if(data.substring(0,data.lastIndexOf("=")).trim() == 'mobilePhone' ){
+                   console.log(data.substring(data.lastIndexOf("=")+1,data.length));
+                   phoneNumberAttribute = data.substring(data.lastIndexOf("=")+1,data.length);
+		   return phoneNumberAttribute;
+                 }
+             }
+        });
+}
+</script>
